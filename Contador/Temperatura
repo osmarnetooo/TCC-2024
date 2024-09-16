@@ -1,0 +1,89 @@
+//Programa: Contador de abelhas e monitoramento de temperatura interno da colmeia
+//Com sensor reflexivo, sendor de temperatura e arduino Mega 2560
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Inicializa o display no endereco 0x27
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Pino de comunicação do sensor DS18B20
+#define ONE_WIRE_BUS 30
+
+// Configura a instância para o sensor
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+int pino_sensor = 7; //Pino do sensor reflexivo
+int valor = 1; //Variável leitura sensor
+int contador = 0;
+
+void setup() {
+  lcd.backlight(); // Acende o monitor LCD
+  Serial.begin(9600);
+  
+  // Inicializa o sensor de temperatura
+  sensors.begin();
+  
+  // Define o pino do sensor de contagem como entrada
+  
+  // Inicializa o display LCD 16x2 I2C
+  lcd.init();
+  
+  // Informações iniciais
+  lcd.setCursor(0, 0);
+  lcd.print("TCC 2024");
+  lcd.setCursor(0, 1);
+  lcd.print("Contador: 0");
+}
+
+void mostrarTemperatura() {
+  // Solicita a leitura da temperatura
+  sensors.requestTemperatures();
+  
+  // Obtém a temperatura em Celsius
+  float temperaturaC = sensors.getTempCByIndex(0);
+  
+  // Mostra a temperatura no LCD
+  lcd.setCursor(0, 0); // Define posição no LCD
+  lcd.print("Temp: ");
+  lcd.print(temperaturaC);
+  lcd.print(" C  ");
+  
+  // Mostra a temperatura no Serial Monitor
+  Serial.print("Temperatura: ");
+  Serial.print(temperaturaC);
+  Serial.println(" C");
+}
+
+void loop() {
+  // Ler o pino do sensor de contagem
+  valor = digitalRead(pino_sensor);
+
+  // Verifica se algum objeto foi detectado (valor = 0)
+  if (valor == 0) {
+    // Incrementa o contador
+    contador++;
+    
+    // Mostra o valor do contador no display
+    lcd.setCursor(10, 1);
+    lcd.print(contador);
+    
+    // Mostra o valor do contador no serial monitor
+    Serial.print("Contador: ");
+    Serial.println(contador);
+    
+    // Loop caso o objeto fique parado em frente ao sensor
+    while (digitalRead(pino_sensor) == 0) {
+      delay(1000);
+    }
+  }
+  
+  // Chama a função para mostrar a temperatura no display
+  mostrarTemperatura();
+  
+  // Pequeno delay para evitar muitas leituras seguidas
+  delay(1000);
+}
