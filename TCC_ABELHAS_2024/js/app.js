@@ -40,13 +40,14 @@ beeCountRef.on('value', (snapshot) => {
 // Gráficos
 let tempData = [];
 let beeData = [];
-let labels = [];
+let tempLabels = []; // Labels independentes para o gráfico de temperatura
+let beeLabels = [];  // Labels independentes para o gráfico de contagem de abelhas
 
 const tempCtx = document.getElementById('tempChart').getContext('2d');
 const tempChart = new Chart(tempCtx, {
   type: 'line',
   data: {
-    labels: labels,
+    labels: tempLabels, // Usa labels específicos para temperatura
     datasets: [{
       label: 'Temperatura (°C)',
       data: tempData,
@@ -77,7 +78,7 @@ const beeCtx = document.getElementById('beeChart').getContext('2d');
 const beeChart = new Chart(beeCtx, {
   type: 'line',
   data: {
-    labels: labels,
+    labels: beeLabels, // Usa labels específicos para contagem de abelhas
     datasets: [{
       label: 'Movimentação de Abelhas',
       data: beeData,
@@ -106,15 +107,15 @@ const beeChart = new Chart(beeCtx, {
 
 // Funções para atualizar os gráficos
 function updateTempChart(temperature) {
-  const currentTime = new Date().toLocaleTimeString();
-  labels.push(currentTime);
-  tempData.push(temperature);
-  tempChart.update();
+  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Exibe apenas hora e minuto
+  tempLabels.push(currentTime); // Atualiza labels do gráfico de temperatura
+  tempData.push(Math.floor(temperature));  // Arredonda para baixo
+  tempChart.update(); 
 }
 
 function updateBeeChart(count) {
-  const currentTime = new Date().toLocaleTimeString();
-  labels.push(currentTime);
+  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Exibe apenas hora e minuto
+  beeLabels.push(currentTime); // Atualiza labels do gráfico de contagem de abelhas
   beeData.push(count);
   beeChart.update();
 }
